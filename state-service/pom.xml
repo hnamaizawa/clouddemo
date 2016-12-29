@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- mvn archetype:generate -DarchetypeArtifactId=jersey-quickstart-grizzly2 
+    -DarchetypeGroupId=org.glassfish.jersey.archetypes -DinteractiveMode=false 
+    -DgroupId=com.example -DartifactId=simple-service -Dpackage=com.example -DarchetypeVersion=2.22.2 -->
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>state-service</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>state-service</name>
+
+  <properties>
+    <jersey.version>2.23.2</jersey.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <mainclass>com.example.Main</mainclass>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.glassfish.jersey</groupId>
+        <artifactId>jersey-bom</artifactId>
+        <version>${jersey.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
+    </dependency>
+
+    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-moxy</artifactId> 
+      <version>${jersey.version}</version> </dependency> -->
+
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
+    </dependency>
+
+    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-processing</artifactId> 
+      </dependency> -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.9</version>
+      <scope>test</scope>
+    </dependency>
+
+<!-- 
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>2.6.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.oracle.jdbc</groupId>
+      <artifactId>ojdbc7</artifactId>
+      <version>12.1.0.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>xdb6</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>orai18n</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>xmlparserv2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>oraclepki</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>osdt_cert</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.oracle.jdbc</groupId>
+          <artifactId>osdt_core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+-->
+
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.21</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.7</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- <plugin> <groupId>org.bsc.maven</groupId> <artifactId>maven-processor-plugin</artifactId> 
+        <version>2.2.4</version> <executions> <execution> <id>eclipselink-jpa-metamodel</id> 
+        <goals> <goal>process</goal> </goals> <phase>generate-sources</phase> <configuration> 
+        <processors> <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor> 
+        </processors> <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments> 
+        <outputDirectory>${project.build.directory}/generated-sources</outputDirectory> 
+        </configuration> </execution> </executions> <dependencies> <dependency> <groupId>org.eclipse.persistence</groupId> 
+        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId> <version>2.6.0</version> 
+        </dependency> </dependencies> </plugin> -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <inherited>true</inherited>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>${mainclass}</mainClass>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antlib.xml" />
+                <!-- <property name="main_class" value="com.example.Main" /> -->
+                <property name="compile_classpath" refid="maven.compile.classpath" />
+                <property name="runtime_classpath" refid="maven.runtime.classpath" />
+                <property name="test_classpath" refid="maven.test.classpath" />
+
+                <property name="app_archive" value="${project.name}-${project.version}.zip" />
+                <property name="jar_archive"
+                  value="${project.name}-${project.version}.${project.packaging}" />
+                <!-- <echoproperties /> -->
+
+                <echo message="app_archive: ${app_archive}" />
+                <echo message="jar_archive: ${jar_archive}" />
+
+                <!-- STEP 1: assemble libraries -->
+                <delete dir="./target/lib" />
+                <mkdir dir="./target/lib" />
+                <for list="${runtime_classpath}" delimiter=";" param="libjar">
+                  <sequential>
+                    <!-- <echo message="@{libjar}" /> -->
+                    <!-- skip the class directory -->
+                    <if>
+                      <available file="@{libjar}" type="file" />
+                      <then>
+                        <copy file="@{libjar}" todir="./target/lib" verbose="true" />
+                      </then>
+                    </if>
+                  </sequential>
+                </for>
+
+                <!-- STEP2: update jar -->
+                <path id="libraries">
+                  <fileset dir="./target/lib" includes="*.jar" />
+                </path>
+                <pathconvert property="classpath" refid="libraries"
+                  targetos="unix" pathsep=" ">
+                  <map from="${basedir}/target/" to="" />
+                </pathconvert>
+                <jar jarfile="./target/${jar_archive}" basedir="./target/classes"
+                  update="true">
+                  <manifest>
+                    <attribute name="Main-Class" value="${mainclass}" />
+                    <attribute name="Class-Path" value="${classpath}" />
+                  </manifest>
+                </jar>
+
+                <!-- STEP 3: create Zip for ACCS -->
+                <copy file="./src/main/assembly/manifest.json" todir="./target"
+                  overwrite="yes">
+                  <filterset>
+                    <filter token="JAR_ARCHIVE" value="${jar_archive}" />
+                  </filterset>
+                </copy>
+                <zip destfile="./target/${app_archive}">
+                  <zipfileset dir="./target/lib" prefix="lib" />
+
+                  <fileset dir="./target" includes="${jar_archive}" />
+                  <fileset dir="./target" includes="manifest.json" />
+                  <fileset dir="./src/main/assembly" includes="deployment.json" />
+                </zip>
+
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <!-- to workaround the loading order -->
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.9.6</version>
+          </dependency>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>1.0b3</version>
+          </dependency>
+        </dependencies>
+
+      </plugin>
+
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.bsc.maven</groupId>
+                    <artifactId>
+                      maven-processor-plugin
+                    </artifactId>
+                    <versionRange>
+                      [2.2.4,)
+                    </versionRange>
+                    <goals>
+                      <goal>process</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <!-- <pluginRepositories> <pluginRepository> <id>maven.oracle.com</id> <url>https://maven.oracle.com</url> 
+    </pluginRepository> </pluginRepositories> -->
+
+</project>
