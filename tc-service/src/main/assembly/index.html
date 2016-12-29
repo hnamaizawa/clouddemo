@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+ Copyright (c) 2014, 2016, Oracle and/or its affiliates.
+ The Universal Permissive License (UPL), Version 1.0
+ -->
+<html lang="ja">
+  <head>
+    <title>Java &amp; Cloud Update Seminar</title>
+    <meta charset="UTF-8"/>
+
+    <meta http-equiv="x-ua-compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0"/>
+    <link rel="icon" type="image/x-icon" href="css/images/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" href="css/images/touchicon.png">
+    <meta name="apple-mobile-web-app-title" content="Oracle JET">
+    <link rel="stylesheet" href="css/alta/2.1.0/web/alta.min.css" id="css" />
+    <!-- This is where you would add any app specific styling -->
+    <link rel="stylesheet" href="css/override.css" type="text/css"/>
+    <script type="text/javascript" data-main="js/main" src="js/libs/require/require.js"></script>
+
+
+    <!-- APMのコレクタを設定する マニュアル埋め込み方式
+    <script>
+    window.apmeum || (apmeum = {});
+    apmeum.customerId='oraclepaastrial01'; // テナントID
+    apmeum.baseCollectorUrl='https://oraclepaastrial01.apm.management.us2.oraclecloud.com/APMaaSCollector/external/collector?';
+    apmeum.statusCode='200';
+    </script>
+    <script async src="https://oraclepaastrial01.apm.management.us2.oraclecloud.com/APMaaSCollector/external/collector/staticlib/apmeum.js"></script>
+    // -->
+
+  </head>
+
+  <body>
+    <div id="mainContent" class="oj-web-applayout-page">
+      <!-- Header content -->
+      <header role="banner" class="oj-web-applayout-header">
+        <div class="oj-web-applayout-max-width oj-flex-bar oj-sm-align-items-center">
+          <!-- アプリケーションメニュー -->
+          <table width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td width="50%">
+            <div data-bind="oj-flex-bar-middle">
+              <span class="oj-web-applayout-header-title" title="Application Name"
+                data-bind="text: titleLabel"></span>
+            </div>
+          </td><td align="right">
+            <span id="welcome"></span>
+            <span id="logout"><a id="logoutLink" href="javascript:void(0)"></a></span>
+          </td></tr></table>
+        </div>
+      </header>
+
+      <!-- Main page content -->
+      <main class="oj-web-applayout-content oj-web-applayout-max-width">
+        <div class="oj-flex">
+          <div class="oj-sm-12 oj-md-6 oj-flex">
+            <div class="oj-panel oj-margin oj-flex-item">
+
+              <!-- ボタンと接続先表示 -->
+              <table width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td width="50%">
+                <button id= "updateButton"
+                      data-bind="ojComponent: { component: 'ojButton', label: '更新' }">
+                </button>
+                &nbsp;&nbsp;
+                <span id="fetch_stat"></span>
+              </td><td align="right">
+                <span id="server_name"></span>
+              </td></tr></table>
+
+              <table summary="従業員一覧を表示" aria-label="従業員一覧を表示"
+                data-bind="ojComponent: { component: 'ojTable', data: tableDataSource,
+                  columns: [
+                    { headerText: 'ID'   },
+                    { headerText: '姓'   },
+                    { headerText: '名'   },
+                    { headerText: '部署' },
+                    { headerText: '給与' }
+                  ],
+                  rowTemplate: 'empRowTemplate',
+                  rootAttributes: { 'style': 'width: 100%;' },
+                }">
+              </table>
+              <script id="empRowTemplate" type="text/html">
+                <tr>
+                  <td data-bind="text: employeeId"></td>
+                  <td data-bind="text: firstName"></td>
+                  <td data-bind="text: lastName"></td>
+                  <td data-bind="text: department"></td>
+                  <td data-bind="text: salary"></td>
+                </tr>
+              </script>
+              <div data-bind="ojComponent: {
+                component: 'ojPagingControl',
+                data: tableDataSource,
+                pageSize: 10
+              }"></div>
+            </div>
+          </div>
+          <div class="oj-sm-12 oj-md-6 oj-flex">
+            <div class="oj-panel oj-margin oj-flex-item">
+
+              <div id="tabs-container">
+                <div id="tabs" data-bind="ojComponent:{component: 'ojTabs'}">
+                  <!-- tab bar -->
+                  <ul>
+                    <li><span>棒グラフ</span></li>
+                    <li><span>3D 円グラフ</span></li>
+                  </ul>
+
+                  <!-- tab contents : start -->
+                  <div id="tabs-1">
+                    <!-- チャートの設定 : ここから-->
+                    <div style="width: 100%; height: 500px;"
+                      data-bind="ojComponent: {
+                        component: 'ojChart',
+                        type: 'bar',
+                        series: chartSeries,
+                        groups: chartGroups,
+                        legend: { position: 'bottom' }
+                      }">
+                    </div>
+                    <!-- チャートの設定: ここまで -->
+                  </div>
+
+                  <div id="tabs-2">
+                    <!-- 円グラフ : ここから-->
+                    <div id="pieChart" data-bind="ojComponent: {
+                        component: 'ojChart',
+                        type: 'pie',
+                        series: chartSeries,
+                        animationOnDisplay: 'auto',
+                        animationOnDataChange: 'auto',
+                        styleDefaults: {threeDEffect: 'on'},
+                        hoverBehavior: 'dim'
+                      }"
+                      style="max-width:500px;width:100%;height:350px;">
+                    </div>
+                    <!-- 円グラフ : ここまで-->
+                  </div>
+                  <!-- tab contents : end -->
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ダイアログボックス user/pass -->
+          <div style="display:none" id="modalDialog1" title="ログイン"
+                 data-bind="ojComponent:{component: 'ojDialog', initialVisibility: 'hide'}">
+          　<div class="oj-dialog-body">
+                 Username<br>
+                 <input id="inputUser" type="text" data-bind="ojComponent: {component: 'ojInputText', value: username}" /><br>
+                 Password<br>
+                 <input id="inputPass" type="password" data-bind="ojComponent: {component: 'ojInputPassword', value: password}" />
+            </div>
+            <div class="oj-dialog-footer">
+              <button id="okButton" data-bind="click: buttonClick, ojComponent: {component: 'ojButton', label: 'OK'}"> </button>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+  </body>
+</html>
