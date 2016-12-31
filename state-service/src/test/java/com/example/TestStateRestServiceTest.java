@@ -9,13 +9,15 @@ import javax.ws.rs.core.Response;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import com.example.StateRestService.KeyValue;
 
-import junit.framework.Assert;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,6 +29,7 @@ import java.util.List;
 /**
  * 
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestStateRestServiceTest {
 
     private static WebTarget target;
@@ -66,7 +69,7 @@ public class TestStateRestServiceTest {
      * Test to see that the message "Got it!" is sent in the response.
      */
     @Test
-    public void testPost() {
+    public void test01_Post() {
 		List<StateRestService.KeyValue> list = new ArrayList<StateRestService.KeyValue>();
 		list.add(new StateRestService.KeyValue("aaa", "bbb"));
 		list.add(new StateRestService.KeyValue("xxx", "yyy"));
@@ -97,7 +100,7 @@ public class TestStateRestServiceTest {
     }
 
     @Test
-    public void testPut() {
+    public void test02_Put() {
 		
         Client c = ClientBuilder.newClient();
         WebTarget target = c.target(SetupTestServer.BASE_URI);
@@ -128,8 +131,9 @@ public class TestStateRestServiceTest {
     }
 
     @Test
-    public void testDelete() {
+    public void test03_Delete() {
 		
+        dump();
         Client c = ClientBuilder.newClient();
         WebTarget target = c.target(SetupTestServer.BASE_URI);
         
@@ -138,9 +142,11 @@ public class TestStateRestServiceTest {
         		.header(X_CLIENT_NAME, hostName)
         		.delete();
         System.out.println("DELETE status: " + response.getStatus());
+
         StateRestService.KeyValue[] items = response.readEntity(StateRestService.KeyValue[].class);
         Assert.assertNull(items);
 
+        dump();
         response = target.path("state/map1")
         		.request(MediaType.APPLICATION_JSON_TYPE)
         		.header(X_CLIENT_NAME, hostName)
@@ -148,6 +154,8 @@ public class TestStateRestServiceTest {
         System.out.println("DELETE status: " + response.getStatus());
         items = response.readEntity(StateRestService.KeyValue[].class);
         Assert.assertNotNull(items);
+
+        dump();
         HashMap<String, String> map = new HashMap<String, String>();
         for(StateRestService.KeyValue item : items){
         	map.put(item.getKey(), item.getValue());
@@ -157,7 +165,16 @@ public class TestStateRestServiceTest {
         assertEquals(map.get("foo"), "bar");
     }
 
-    
+    public void dump(){
+        Client c = ClientBuilder.newClient();
+        WebTarget target = c.target(SetupTestServer.BASE_URI);
+        
+        Response response = target.path("state/dump")
+        		.request(MediaType.TEXT_PLAIN)
+        		.header(X_CLIENT_NAME, "x")
+        		.get();
+        System.out.println(response.readEntity(String.class));
+    }
     
     
 }
