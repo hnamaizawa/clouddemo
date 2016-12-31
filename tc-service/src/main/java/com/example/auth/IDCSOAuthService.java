@@ -345,10 +345,10 @@ Authorization: Bearer <token>
 	//@Context private HttpServletRequest request;
 	  
 	@GET
-	@Path("/logout")
+	@Path("/logout_start")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response oauthLogout(@Context UriInfo uriInfo, @HeaderParam(AuthRestService.X_AUTH_TOKEN) String token) throws Exception{
-		logger.info("/logout called");
+	public Response oauthLogoutStart(@Context UriInfo uriInfo, @HeaderParam(AuthRestService.X_AUTH_TOKEN) String token) throws Exception{
+		logger.info("/logout_start called");
 		Session session = AuthRestService.removeSession(token);
 		if(null == session){
 			logger.warn("No session found for token: " + token);
@@ -419,10 +419,10 @@ Authorization: Bearer <token>
 
 	// ログアウト処理のイベント？
 	@GET
-	@Path("/finish")
+	@Path("/logout")
 	//@Produces(MediaType.TEXT_PLAIN)
-	public Response oauthFinish() {
-		logger.info("/finish called");
+	public Response oauthLogout() {
+		logger.info("/logout called");
 		return Response.ok().build();
 	}
 	

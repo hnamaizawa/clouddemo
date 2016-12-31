@@ -209,7 +209,7 @@ require([
                 var authToken = sessionStorage.authToken;
                 sessionStorage.removeItem('authToken');
                 $.ajax({
-                    url: location.protocol + "//" + location.host + contextRoot + "/api/oauth/logout",
+                    url: location.protocol + "//" + location.host + contextRoot + "/api/oauth/logout_start",
                     headers: {
                         'X-AUTH-TOKEN': authToken
                     }
