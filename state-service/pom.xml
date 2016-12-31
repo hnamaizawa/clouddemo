@@ -165,6 +165,7 @@
                 <property name="compile_classpath" refid="maven.compile.classpath" />
                 <property name="runtime_classpath" refid="maven.runtime.classpath" />
                 <property name="test_classpath" refid="maven.test.classpath" />
+                <echo message="runtime_classpath: ${runtime_classpath}" />
 
                 <property name="app_archive" value="${project.name}-${project.version}.zip" />
                 <property name="jar_archive"
@@ -177,7 +178,7 @@
                 <!-- STEP 1: assemble libraries -->
                 <delete dir="./target/lib" />
                 <mkdir dir="./target/lib" />
-                <for list="${runtime_classpath}" delimiter=";" param="libjar">
+                <for list="${runtime_classpath}" delimiter="${path.separator}" param="libjar">
                   <sequential>
                     <!-- <echo message="@{libjar}" /> -->
                     <!-- skip the class directory -->
