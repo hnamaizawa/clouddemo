@@ -10,6 +10,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -220,7 +223,11 @@ public class AuthRestService {
 			logger.info("Session created - id: " + session.id + ", authToken: " + authToken);
 
 			// リモートも更新
-			stateServicePost(authToken, session);
+			try{
+				stateServicePost(authToken, session);
+			}catch(Exception e){
+				logger.error("Couldn't update remote state: " + e.getMessage(), e);
+			}
 			return authToken;
 		}
 	}
@@ -229,7 +236,11 @@ public class AuthRestService {
 		Session session = sessions.get(authToken);
 		// キャッシュに見つからなかったらリモートを確認
 		if(null == session){
-			session = stateServiceGet(authToken);
+			try{
+				session = stateServiceGet(authToken);
+			}catch(Exception e){
+				logger.error("Couldn't get remote state: " + e.getMessage(), e);
+			}
 			if(null != session){ // ローカルキャッシュに入れる
 				sessions.put(authToken, session);
 			}
@@ -243,7 +254,11 @@ public class AuthRestService {
 			session = sessions.remove(authToken);
 		}
 		// リモートも消去
-		session = stateServiceDelete(authToken);
+		try{
+			session = stateServiceDelete(authToken);
+		}catch(Exception e){
+			logger.error("Couldn't remove remote state: " + e.getMessage(), e);
+		}
 		return session;
 	}
 
@@ -283,8 +298,8 @@ public class AuthRestService {
 	
 	//////////////////////////////////////////////////////////////////
 	
-	private static void stateServicePost(String authToken, Session session){
-        Client c = ClientBuilder.newClient();
+	private static void stateServicePost(String authToken, Session session) throws GeneralSecurityException{
+        Client c = ForJaxRsClient.getLooseSslClient();
         try{
         	
             WebTarget target = c.target(stateServiceURL);
@@ -321,8 +336,8 @@ public class AuthRestService {
         }
 	}
 
-	private static Session stateServiceGet(String authToken){
-        Client c = ClientBuilder.newClient();
+	private static Session stateServiceGet(String authToken) throws GeneralSecurityException{
+        Client c = ForJaxRsClient.getLooseSslClient();
         try{
 //    		WebTarget target = c.target(getSateServiceURL());
     		WebTarget target = c.target(stateServiceURL);
@@ -347,8 +362,8 @@ public class AuthRestService {
         }
 	}
 
-	private static Session stateServiceDelete(String authToken){
-        Client c = ClientBuilder.newClient();
+	private static Session stateServiceDelete(String authToken) throws GeneralSecurityException{
+        Client c = ForJaxRsClient.getLooseSslClient();
         try{
 //    		WebTarget target = c.target(getSateServiceURL());
     		WebTarget target = c.target(stateServiceURL);
@@ -456,11 +471,11 @@ public class AuthRestService {
 	
 	////////////////////
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws GeneralSecurityException{
 //		Session session = new Session("ID", "USERNAME");
 //		stateServicePost("TOKEN_" + System.currentTimeMillis(), session);
 
-        Client c = ClientBuilder.newClient();
+        Client c = ForJaxRsClient.getLooseSslClient();
         	
             WebTarget target = c.target(stateServiceURL);
 
