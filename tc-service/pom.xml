@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.example</groupId>
-	<artifactId>tc-service</artifactId>
+	<artifactId>tc-service-wls</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>tc-service</name>
@@ -12,11 +12,25 @@
 	<properties>
 		<jersey.version>2.23.2</jersey.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<oracleMiddlewareHome>C:/opt/oracle/wls122100</oracleMiddlewareHome>
+		<oracleServerUrl>t3://localhost:7001</oracleServerUrl>
+		<oracleUsername>weblogic</oracleUsername>
+		<oraclePassword>welcome1</oraclePassword>
+		<oracleServerName>AdminServer</oracleServerName>
 	</properties>
+
+	<parent>
+		<groupId>com.oracle.weblogic.archetype</groupId>
+		<artifactId>wls-common</artifactId>
+		<version>12.2.1-0-0</version>
+	</parent>
 
 	<build>
 		<finalName>api</finalName>
+
 		<plugins>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -57,82 +71,84 @@
 					<!-- <dependency> <groupId>ant-contrib</groupId> <artifactId>ant-contrib</artifactId> 
 						<version>1.0b3</version> </dependency> -->
 				</dependencies>
-
 			</plugin>
+
+			<!-- deploy api.war -->
+<!-- 
+			<plugin> 
+				<groupId>com.oracle.weblogic</groupId>
+				<artifactId>weblogic-maven-plugin</artifactId>
+				<version>12.2.1-0-0</version>
+				<configuration>
+					<middlewareHome>${oracleMiddlewareHome}</middlewareHome>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>redeploy</goal>
+						</goals>
+						<configuration>
+							<adminurl>${oracleServerUrl}</adminurl>
+							<user>${oracleUsername}</user>
+							<password>${oraclePassword}</password>
+							<source>${project.build.directory}/${project.build.finalName}.${project.packaging}</source>
+							<targets>${oracleServerName}</targets>
+							<verbose>true</verbose>
+							<name>${project.build.finalName}</name>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+-->
+			<!-- deploy ROOT.war -->
+<!-- 
+			<plugin> 
+				<groupId>com.oracle.weblogic</groupId>
+				<artifactId>weblogic-maven-plugin</artifactId>
+				<version>12.2.1-0-0</version>
+				<configuration>
+					<middlewareHome>${oracleMiddlewareHome}</middlewareHome>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>redeploy</goal>
+						</goals>
+						<configuration>
+							<adminurl>${oracleServerUrl}</adminurl>
+							<user>${oracleUsername}</user>
+							<password>${oraclePassword}</password>
+							<source>${project.build.directory}/ROOT.war</source>
+							<targets>${oracleServerName}</targets>
+							<verbose>true</verbose>
+							<name>ROOT</name>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+-->
 
 		</plugins>
 	</build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.glassfish.jersey</groupId>
-				<artifactId>jersey-bom</artifactId>
-				<version>${jersey.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-servlet</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-		<!-- uncomment this to get JSON support <dependency> <groupId>org.glassfish.jersey.media</groupId> 
-			<artifactId>jersey-media-moxy</artifactId> </dependency> -->
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>${jersey.version}</version>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>7.0</version>
+			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>eclipselink</artifactId>
-			<version>2.6.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.oracle.jdbc</groupId>
-			<artifactId>ojdbc7</artifactId>
-			<version>12.1.0.2</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>xdb6</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>orai18n</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>xmlparserv2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>oraclepki</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>osdt_cert</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>osdt_core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
+		<!-- <dependency> <groupId>com.oracle.jdbc</groupId> <artifactId>ojdbc7</artifactId> 
+			<version>12.1.0.2</version> <exclusions> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>xdb6</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>orai18n</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>xmlparserv2</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>oraclepki</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>osdt_cert</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+			<artifactId>osdt_core</artifactId> </exclusion> </exclusions> </dependency> -->
 
 
 		<dependency>
