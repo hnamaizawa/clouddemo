@@ -150,6 +150,11 @@
 			<artifactId>osdt_cert</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
 			<artifactId>osdt_core</artifactId> </exclusion> </exclusions> </dependency> -->
 
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>4.16</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -161,6 +166,8 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.7</version>
 		</dependency>
+
+
 
 	</dependencies>
 

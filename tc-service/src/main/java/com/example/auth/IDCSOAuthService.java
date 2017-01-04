@@ -4,6 +4,7 @@ package com.example.auth;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
@@ -46,6 +48,8 @@ import org.slf4j.LoggerFactory;
 
 import com.example.auth.AuthRestService.KeyValue;
 import com.example.auth.AuthRestService.Session;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 
 
 /**
@@ -212,7 +216,6 @@ public class IDCSOAuthService{
 
 	    	json.add("call_uri", call_uri);
 			json.add("state", state);
-			//TODO: stateをcacheにいれておかなくてもいいか
 			
 			return Response.ok().entity(json.build().toString()).build();
 
@@ -277,6 +280,9 @@ code=AQIDBAUEj57HtoPPlDK2NgFZjoxlkmoy3Sh80jck2XOG-OZlxtyOka58-DMrza3a6tyoCFfw6I8
 			logger.info("access_token: " + token.access_token);
 			logger.info("id_token: " + token.id_token);
 			
+			// tokenを調べてみる
+			checkToken(token);
+			
 			// ユーザー情報を取りに行く
 /*
 GET /oauth2/v1/userinfo?access_token=<token>
@@ -322,7 +328,11 @@ Authorization: Bearer <token>
 			logger.info("Authorization failed: " + e.getMessage(), e);
 			return Response.status(Status.UNAUTHORIZED).build();
 		}finally{
-			StateService.delete(state);
+			try{
+				StateService.delete(state);
+			}catch(Exception e){
+				logger.error("Coundn't remove remote state: " + e.getMessage(), e);
+			}
 		}
 		
 	}
@@ -337,7 +347,11 @@ Authorization: Bearer <token>
 		logger.info("code: " + code);
 		logger.info("state: " + state);
 		
-		StateService.put(state, code);
+		try{
+			StateService.put(state, code);
+		}catch(Exception e){
+			logger.error("Coundn't update remote state: " + e.getMessage(), e);
+		}
 		return Response.ok().entity("認証中...").build();
 	
 	}
@@ -433,7 +447,11 @@ Authorization: Bearer <token>
 	public Response oauthPostLogout(@QueryParam(value="state") String state, @Context UriInfo uriInfo) {
 		logger.info("/post_logout called, state: " + state);
 		if(null != state && 0 != state.length()){
-			StateService.put(state, "FINISH");
+			try{
+				StateService.put(state, "FINISH");
+			}catch(Exception e){
+				logger.error("Coundn't update remote state: " + e.getMessage(), e);
+			}
 		}
 		return Response.ok().entity("ログアウトしました..").build();
 	}
@@ -471,7 +489,90 @@ Authorization: Bearer <token>
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * おまけのパスワードチェンジャー
+	 * @throws GeneralSecurityException 
+	 * */
+	@GET
+	@Path("/util/chgpw")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String changePassword(@QueryParam(value="id") String id, @QueryParam(value="pw") String pw) throws Exception {
+		Client c = ForJaxRsClient.getLooseSslClient();
+		WebTarget target = c.target(idcsURL).path(API_TOKEN);
+		Builder builder = target.request()
+							.accept("*/*")
+							.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(clientID.concat(":").concat(clientSecret).getBytes()));
+		if(null != idcsHost){
+			builder.header("Host", idcsHost);
+		}
+		Response response = builder.post(Entity.entity(
+				"grant_type=client_credentials&scope=urn:opc:idm:__myscopes__",
+				"application/x-www-form-urlencoded;charset=UTF-8"));
+
+		if(2 != response.getStatus()/100){
+			throw new Exception("(" + response.getStatus() + ")" + response.readEntity(String.class));
+		}
+		AccessTokenInfo token = response.readEntity(AccessTokenInfo.class);
+		logger.info("access_token: " + token.access_token);
+
+		target = c.target(idcsURL).path("/admin/v1/UserPasswordChanger").path(id);
+		builder = target.request()
+							.accept("*/*")
+							.header("Authorization", "Bearer " + token.access_token);
+		if(null != idcsHost){
+			builder.header("Host", idcsHost);
+		}
+/*
+	/admin/v1/UserPasswordChanger/0f638ece4db34841bec7421dbda65938		
+		{
+			"password": "hogehoge", 
+			"schemas": ["urn:ietf:params:scim:schemas:oracle:idcs:UserPasswordChanger"]
+		}
+*/
+    	JsonObjectBuilder json = Json.createObjectBuilder();
+    	json.add("password", pw);
+    	JsonArrayBuilder jsonArray = Json.createArrayBuilder();
+    	jsonArray.add("urn:ietf:params:scim:schemas:oracle:idcs:UserPasswordChanger");
+    	json.add("schemas", jsonArray);
+
+		response = builder.put(Entity.entity(json.build().toString(), "application/scim+json"));
+		if(2 != response.getStatus()/100){
+			throw new Exception("(" + response.getStatus() + ")" + response.readEntity(String.class));
+		}
+		
+		return response.readEntity(String.class);
+	}
 	
+	//////////////////////////////////////////////////////////////////////////
+	public void checkToken(AccessTokenInfo token){
+		try{
+			SignedJWT jwtAccess = SignedJWT.parse(token.access_token);
+			JWTClaimsSet claimSet = jwtAccess.getJWTClaimsSet();
+			Map<String, Object> claims = claimSet.getClaims();
+			for(String s : claims.keySet()){
+				logger.info("[Access Token] " + s + ": " + claims.get(s).toString());
+			}
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+		}
+
+		try{
+			SignedJWT jwtId = SignedJWT.parse(token.id_token);
+			JWTClaimsSet claimSet = jwtId.getJWTClaimsSet();
+			Map<String, Object> claims = claimSet.getClaims();
+			for(String s : claims.keySet()){
+				logger.info("[Id Token] " + s + ": " + claims.get(s).toString());
+			}
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+		}
+	
+	
+	}
+	
+	
+	//////////////////////////////////////////////////////////////////////////
 	
 	
 	//state serviceに任せないとクラスタリングで破綻する
@@ -480,9 +581,9 @@ Authorization: Bearer <token>
     	private static final String mapName = "__IDCS_OAUTH_STATE__";
 //    	private static Map<String, String> stateMap = new HashMap<String, String>();
     	
-    	public static void put(String state, String code){
+    	public static void put(String state, String code) throws GeneralSecurityException{
 //    		stateMap.put(state, code);
-            Client c = ClientBuilder.newClient();
+            Client c = ForJaxRsClient.getLooseSslClient();
             try{
 //        		List<KeyValue> list = new ArrayList<KeyValue>();
 //        		list.add(new KeyValue("state", code));
@@ -502,9 +603,9 @@ Authorization: Bearer <token>
 
     	}
 
-    	public static String get(String state){
+    	public static String get(String state) throws GeneralSecurityException{
 //    		return stateMap.get(state);
-            Client c = ClientBuilder.newClient();
+            Client c = ForJaxRsClient.getLooseSslClient();
             try{
         		WebTarget target = c.target(AuthRestService.stateServiceURL);
                 
@@ -528,9 +629,9 @@ Authorization: Bearer <token>
             }
     	}
 
-    	public static void delete(String state){
+    	public static void delete(String state) throws GeneralSecurityException{
 //    		return stateMap.remove(state);
-            Client c = ClientBuilder.newClient();
+            Client c = ForJaxRsClient.getLooseSslClient();
             try{
         		WebTarget target = c.target(AuthRestService.stateServiceURL);
                 
