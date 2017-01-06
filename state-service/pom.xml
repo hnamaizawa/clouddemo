@@ -3,8 +3,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <!-- mvn archetype:generate -DarchetypeArtifactId=jersey-quickstart-grizzly2 
-    -DarchetypeGroupId=org.glassfish.jersey.archetypes -DinteractiveMode=false 
+  <!-- mvn archetype:generate -DarchetypeArtifactId=jersey-quickstart-grizzly2
+    -DarchetypeGroupId=org.glassfish.jersey.archetypes -DinteractiveMode=false
     -DgroupId=com.example -DartifactId=simple-service -Dpackage=com.example -DarchetypeVersion=2.22.2 -->
 
   <modelVersion>4.0.0</modelVersion>
@@ -40,7 +40,7 @@
       <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
     </dependency>
 
-    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-moxy</artifactId> 
+    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-moxy</artifactId>
       <version>${jersey.version}</version> </dependency> -->
 
     <dependency>
@@ -49,7 +49,7 @@
       <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
     </dependency>
 
-    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-processing</artifactId> 
+    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-processing</artifactId>
       </dependency> -->
 
     <dependency>
@@ -59,7 +59,7 @@
       <scope>test</scope>
     </dependency>
 
-<!-- 
+<!--
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>eclipselink</artifactId>
@@ -115,14 +115,14 @@
 
   <build>
     <plugins>
-      <!-- <plugin> <groupId>org.bsc.maven</groupId> <artifactId>maven-processor-plugin</artifactId> 
-        <version>2.2.4</version> <executions> <execution> <id>eclipselink-jpa-metamodel</id> 
-        <goals> <goal>process</goal> </goals> <phase>generate-sources</phase> <configuration> 
-        <processors> <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor> 
-        </processors> <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments> 
-        <outputDirectory>${project.build.directory}/generated-sources</outputDirectory> 
-        </configuration> </execution> </executions> <dependencies> <dependency> <groupId>org.eclipse.persistence</groupId> 
-        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId> <version>2.6.0</version> 
+      <!-- <plugin> <groupId>org.bsc.maven</groupId> <artifactId>maven-processor-plugin</artifactId>
+        <version>2.2.4</version> <executions> <execution> <id>eclipselink-jpa-metamodel</id>
+        <goals> <goal>process</goal> </goals> <phase>generate-sources</phase> <configuration>
+        <processors> <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
+        </processors> <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
+        <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+        </configuration> </execution> </executions> <dependencies> <dependency> <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId> <version>2.6.0</version>
         </dependency> </dependencies> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -157,6 +157,7 @@
         <version>1.8</version>
         <executions>
           <execution>
+            <id>package_accs</id>
             <phase>package</phase>
             <configuration>
               <target>
@@ -228,6 +229,72 @@
               <goal>run</goal>
             </goals>
           </execution>
+
+          <!-- deploy to ACCS -->
+          <execution>
+            <id>pdeploy_accs</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <property name="accsServiceURL" value="apaas.europe.oraclecloud.com" />
+                <property name="accsIdentityDomain" value="gse00000630" />
+                <property name="accsUsername" value="cloud.admin" />
+                <property name="accsPassword" value="aCerB@7TeaSing" />
+                <property name="accsContanier" value="accs_upload" />
+                <property name="app_archive" value="${project.name}-${project.version}.zip" />
+                <property name="app_name" value="${project.name}" />
+                <tstamp>
+                    <format property="now" pattern="yyyy/MM/dd HH:mm:ss Z" />
+                </tstamp>
+
+                <echo message="##### Create ACCS Container #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-H Content-Length:0"/>
+                  <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/"/>
+                </exec>
+
+                <echo message="##### Upload zip to ACCS Container #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-T target/${app_archive}"/>
+                  <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/${app_archive}"/>
+                </exec>
+<!--
+                <echo message="##### Deploy app to ACCS #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="-/-insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
+                  <arg line="-H Content-Type:multipart/form-data"/>
+                  <arg line="-F name=${app_name}"/>
+                  <arg line="-F runtime=java"/>
+                  <arg line="-F subscription=Monthly"/>
+                  <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
+                  <arg line="-F notes='Packaged at ${now}'"/>
+                  <arg line="-X POST https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}"/>
+                </exec>
+-->
+                <!-- arg line="-F manifest=@manifest.json"/ -->
+                <!-- arg line="-F deployment=@deployment.json"/ -->
+
+                <echo message="##### Update app to ACCS #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
+                  <arg line="-H Content-Type:multipart/form-data"/>
+                  <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
+                  <arg line="-F notes='Packaged at ${now}'"/>
+                  <arg line="-X PUT https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${app_name}"/>
+                </exec>
+                <!-- arg line="-F manifest=@manifest.json"/ -->
+                <!-- arg line="-F deployment=@deployment.json"/ -->
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+
         </executions>
         <dependencies>
           <dependency>
@@ -248,7 +315,7 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
+        <!--This plugin's configuration is used to store Eclipse m2e settings
           only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -282,7 +349,7 @@
     </pluginManagement>
   </build>
 
-  <!-- <pluginRepositories> <pluginRepository> <id>maven.oracle.com</id> <url>https://maven.oracle.com</url> 
+  <!-- <pluginRepositories> <pluginRepository> <id>maven.oracle.com</id> <url>https://maven.oracle.com</url>
     </pluginRepository> </pluginRepositories> -->
 
 </project>
