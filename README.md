@@ -1,14 +1,15 @@
 # cloudseminar201612
-Demo source of Java and Oracle Cloud Platform seminar @OAC on Dec 2nd, 2016 
+Demo source of Java and Oracle Cloud Platform seminar @OAC on Dec 2nd, 2016
 
-## デモ本体 tc-service
+## デモ本体 emplist-api & emplist-root
 
 ### モジュール
-* ROOT.war スタティックコンテンツ / Javascript
-* api.war RESTサービス
+* ROOT.war - static contents / Javascript
+* api.war - RESTサービス
 
-mvn packageして出来あがった2つのwarをデプロイします  
-Tomcatの場合はROOTを上書きします（ルートコンテキストで動かす場合）
+其々 mvn package して出来あがった2つのwarをデプロイします  
+Tomcatの場合はROOTを上書きします（ルートコンテキストで動かす場合）  
+mvn pre-integration-test でACCSやWebLogicにデプロイするように仕込んであります
 
 ### branch
 * master Tomcat用
