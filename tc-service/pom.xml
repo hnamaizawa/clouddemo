@@ -46,6 +46,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.8</version>
+
         <executions>
           <execution>
             <phase>package</phase>
@@ -61,6 +62,59 @@
               <goal>run</goal>
             </goals>
           </execution>
+
+          <!-- deploy api.war and ROOT.war throuh REST-->
+          <execution>
+            <id>deply_weblogic_async</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <echo message="##### undelopy api.war #####" />
+                <exec failonerror="false" executable="curl">
+                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-X DELETE http://localhost:7001/management/weblogic/latest/edit/appDeployments/api?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
+                </exec>
+
+                <echo message="##### undelopy ROOT.war #####" />
+                <exec failonerror="false" executable="curl">
+                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-X DELETE http://localhost:7001/management/weblogic/latest/edit/appDeployments/ROOT?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
+                </exec>
+
+                <echo message="##### delopy api.war #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-H Content-Type:multipart/form-data"/>
+                  <arg line="-F model={name:'api',targets:[{identity:['servers','AdminServer']}]}"/>
+                  <arg line="-F sourcePath=@target/api.war"/>
+                  <!-- arg line="-H Prefer:respond-async"/ -->
+                  <arg line="-X POST http://localhost:7001/management/weblogic/latest/edit/appDeployments"/>
+                </exec>
+
+                <echo message="##### delopy ROOT.war #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-H Content-Type:multipart/form-data"/>
+                  <arg line="-F model={name:'ROOT',targets:[{identity:['servers','AdminServer']}]}"/>
+                  <arg line="-F sourcePath=@target/ROOT.war"/>
+                  <!-- arg line="-H Prefer:respond-async"/ -->
+                  <arg line="-X POST http://localhost:7001/management/weblogic/latest/edit/appDeployments"/>
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+
         </executions>
         <dependencies>
           <dependency>
@@ -69,14 +123,15 @@
             <artifactId>ant</artifactId>
             <version>1.9.6</version>
           </dependency>
-          <!-- <dependency> <groupId>ant-contrib</groupId> <artifactId>ant-contrib</artifactId> 
+          <!-- <dependency> <groupId>ant-contrib</groupId> <artifactId>ant-contrib</artifactId>
             <version>1.0b3</version> </dependency> -->
         </dependencies>
       </plugin>
 
+
       <!-- deploy api.war -->
-<!-- 
-      <plugin> 
+<!--
+      <plugin>
         <groupId>com.oracle.weblogic</groupId>
         <artifactId>weblogic-maven-plugin</artifactId>
         <version>12.2.1-0-0</version>
@@ -103,8 +158,8 @@
       </plugin>
 -->
       <!-- deploy ROOT.war -->
-<!-- 
-      <plugin> 
+<!--
+      <plugin>
         <groupId>com.oracle.weblogic</groupId>
         <artifactId>weblogic-maven-plugin</artifactId>
         <version>12.2.1-0-0</version>
@@ -142,13 +197,13 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- <dependency> <groupId>com.oracle.jdbc</groupId> <artifactId>ojdbc7</artifactId> 
-      <version>12.1.0.2</version> <exclusions> <exclusion> <groupId>com.oracle.jdbc</groupId> 
-      <artifactId>xdb6</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
-      <artifactId>orai18n</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
-      <artifactId>xmlparserv2</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
-      <artifactId>oraclepki</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
-      <artifactId>osdt_cert</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId> 
+    <!-- <dependency> <groupId>com.oracle.jdbc</groupId> <artifactId>ojdbc7</artifactId>
+      <version>12.1.0.2</version> <exclusions> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>xdb6</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>orai18n</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>xmlparserv2</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>oraclepki</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>osdt_cert</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
       <artifactId>osdt_core</artifactId> </exclusion> </exclusions> </dependency> -->
 
         <dependency>
