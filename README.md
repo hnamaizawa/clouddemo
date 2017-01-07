@@ -11,9 +11,9 @@ Demo source of Java and Oracle Cloud Platform seminar @OAC on Dec 2nd, 2016
 Tomcatの場合はROOTを上書きします（ルートコンテキストで動かす場合）  
 mvn pre-integration-test でACCSやWebLogicにデプロイするように仕込んであります
 
-### branch
-* master Tomcat用
-* weblogic WebLogic用
+### maven pom
+* pom.xml Tomcat用
+* pom-weblogic.xml WebLogic用
 
 
 ### 環境変数
@@ -40,6 +40,7 @@ AUTH_IDCS_HOSTを設定した場合は、Java起動オプションに
 
 ## ステートキャッシュ state-service
 
-デモアプリが認証ステータスを保持するためのとりあえずのキャッシュサーバー   
+デモアプリが認証ステータスを保持するためのとりあえずのキャッシュサーバーです  
+ACCS向けの軽量JAX-RSサーバーの作り方としては標準的なものと思います  
 そのままmvn packageするとgrizzly+JerseyベースのRESTサーバがACCS用ZIPとして作成されます  
 ローカルでてっとり早く動かしたい場合は mvn exec:java で即起動します
