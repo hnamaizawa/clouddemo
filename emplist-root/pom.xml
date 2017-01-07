@@ -70,14 +70,14 @@
               <target>
                 <echo message="##### undelopy ROOT.war #####" />
                 <exec failonerror="false" executable="curl">
-                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
                   <arg line="-H X-Requested-By:MyClient"/>
                   <arg line="-H Accept:application/json"/>
                   <arg line="-X DELETE http://localhost:7001/management/weblogic/latest/edit/appDeployments/ROOT?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
                 </exec>
                 <echo message="##### delopy ROOT.war #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="-u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
                   <arg line="-H X-Requested-By:MyClient"/>
                   <arg line="-H Accept:application/json"/>
                   <arg line="-H Content-Type:multipart/form-data"/>
