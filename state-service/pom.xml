@@ -249,21 +249,21 @@
 
                 <echo message="##### Create ACCS Container #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-H Content-Length:0"/>
                   <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/"/>
                 </exec>
 
                 <echo message="##### Upload zip to ACCS Container #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-T target/${app_archive}"/>
                   <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/${app_archive}"/>
                 </exec>
 <!--
                 <echo message="##### Deploy app to ACCS #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="-/-insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-f -s -S -/-insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
                   <arg line="-H Content-Type:multipart/form-data"/>
                   <arg line="-F name=${app_name}"/>
@@ -279,7 +279,7 @@
 
                 <echo message="##### Update app to ACCS #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="--insecure -u ${accsUsername}:${accsPassword}"/>
+                  <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
                   <arg line="-H Content-Type:multipart/form-data"/>
                   <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
