@@ -7,10 +7,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -60,17 +56,17 @@ public class Employee implements Serializable {
 	private long managerId;
 	
 	//bi-directional many-to-one association to Employee
-	@ManyToOne 
-	@JoinColumn(name="MANAGER_ID")
+	//@ManyToOne 
+	//@JoinColumn(name="MANAGER_ID")
 	//@JsonBackReference
-	@JsonIgnore
-	private Employee manager;
+	//@JsonIgnore
+	//private Employee manager;
 
 	//bi-directional many-to-one association to Employee
-	@OneToMany(mappedBy="manager") 
+	//@OneToMany(mappedBy="manager") 
 	//@JsonManagedReference
-	@JsonIgnore
-	private List<Employee> employees;
+	//@JsonIgnore
+	//private List<Employee> employees;
 
 	//uni-directional many-to-one association to Job
 	@ManyToOne
@@ -151,7 +147,7 @@ public class Employee implements Serializable {
 	public void setDepartment(Department department) {
 		this.department = department;
 	}
-
+/*
 	public Employee getManager() {
 		return this.manager;
 	}
@@ -181,7 +177,7 @@ public class Employee implements Serializable {
 
 		return employee;
 	}
-
+*/
 	public Job getJob() {
 		return this.job;
 	}

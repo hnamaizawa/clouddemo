@@ -1,0 +1,223 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>emplist-root</artifactId>
+  <packaging>war</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>emplist-root</name>
+
+  <properties>
+    <jersey.version>2.23.2</jersey.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <oracleMiddlewareHome>C:/opt/oracle/wls122100</oracleMiddlewareHome>
+    <oracleServerUrl>t3://localhost:7001</oracleServerUrl>
+    <oracleUsername>weblogic</oracleUsername>
+    <oraclePassword>welcome1</oraclePassword>
+    <oracleServerName>AdminServer</oracleServerName>
+  </properties>
+
+  <parent>
+    <groupId>com.oracle.weblogic.archetype</groupId>
+    <artifactId>wls-common</artifactId>
+    <version>12.2.1-0-0</version>
+  </parent>
+
+  <build>
+    <finalName>ROOT</finalName>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <inherited>true</inherited>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <zip update="true" destfile="./target/ROOT.war">
+                  <zipfileset dir="../work/oraclejet" />
+                </zip>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+
+          <!-- deploy api.war and ROOT.war throuh REST-->
+          <execution>
+            <id>deply_weblogic_async</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <echo message="##### undelopy ROOT.war #####" />
+                <exec failonerror="false" executable="curl">
+                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-X DELETE http://localhost:7001/management/weblogic/latest/edit/appDeployments/ROOT?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
+                </exec>
+                <echo message="##### delopy ROOT.war #####" />
+                <exec failonerror="true" executable="curl">
+                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-H X-Requested-By:MyClient"/>
+                  <arg line="-H Accept:application/json"/>
+                  <arg line="-H Content-Type:multipart/form-data"/>
+                  <arg line="-F model={name:'ROOT',targets:[{identity:['servers','AdminServer']}]}"/>
+                  <arg line="-F sourcePath=@target/ROOT.war"/>
+                  <!-- arg line="-H Prefer:respond-async"/ -->
+                  <arg line="-X POST http://localhost:7001/management/weblogic/latest/edit/appDeployments"/>
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+
+        </executions>
+        <dependencies>
+          <dependency>
+            <!-- to workaround the loading order -->
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.9.6</version>
+          </dependency>
+          <!-- <dependency> <groupId>ant-contrib</groupId> <artifactId>ant-contrib</artifactId>
+            <version>1.0b3</version> </dependency> -->
+        </dependencies>
+      </plugin>
+
+
+      <!-- deploy api.war -->
+<!--
+      <plugin>
+        <groupId>com.oracle.weblogic</groupId>
+        <artifactId>weblogic-maven-plugin</artifactId>
+        <version>12.2.1-0-0</version>
+        <configuration>
+          <middlewareHome>${oracleMiddlewareHome}</middlewareHome>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>redeploy</goal>
+            </goals>
+            <configuration>
+              <adminurl>${oracleServerUrl}</adminurl>
+              <user>${oracleUsername}</user>
+              <password>${oraclePassword}</password>
+              <source>${project.build.directory}/${project.build.finalName}.${project.packaging}</source>
+              <targets>${oracleServerName}</targets>
+              <verbose>true</verbose>
+              <name>${project.build.finalName}</name>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+-->
+      <!-- deploy ROOT.war -->
+<!--
+      <plugin>
+        <groupId>com.oracle.weblogic</groupId>
+        <artifactId>weblogic-maven-plugin</artifactId>
+        <version>12.2.1-0-0</version>
+        <configuration>
+          <middlewareHome>${oracleMiddlewareHome}</middlewareHome>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>redeploy</goal>
+            </goals>
+            <configuration>
+              <adminurl>${oracleServerUrl}</adminurl>
+              <user>${oracleUsername}</user>
+              <password>${oraclePassword}</password>
+              <source>${project.build.directory}/ROOT.war</source>
+              <targets>${oracleServerName}</targets>
+              <verbose>true</verbose>
+              <name>ROOT</name>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+-->
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-web-api</artifactId>
+      <version>7.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- <dependency> <groupId>com.oracle.jdbc</groupId> <artifactId>ojdbc7</artifactId>
+      <version>12.1.0.2</version> <exclusions> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>xdb6</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>orai18n</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>xmlparserv2</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>oraclepki</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>osdt_cert</artifactId> </exclusion> <exclusion> <groupId>com.oracle.jdbc</groupId>
+      <artifactId>osdt_core</artifactId> </exclusion> </exclusions> </dependency> -->
+
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>4.16</version>
+        </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.21</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.7</version>
+    </dependency>
+
+
+
+  </dependencies>
+
+
+  <repositories>
+    <repository>
+      <id>maven.oracle.com</id>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>https://maven.oracle.com</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+
+</project>
