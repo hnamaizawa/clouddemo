@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <!-- mvn archetype:generate -DarchetypeArtifactId=jersey-quickstart-grizzly2
     -DarchetypeGroupId=org.glassfish.jersey.archetypes -DinteractiveMode=false
@@ -37,20 +36,21 @@
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-grizzly2-http</artifactId>
-      <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
+      <version>${jersey.version}</version>
+      <!--$NO-MVN-MAN-VER$-->
     </dependency>
 
     <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-moxy</artifactId>
       <version>${jersey.version}</version> </dependency> -->
+    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-processing</artifactId>
+      </dependency> -->
 
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
-      <version>${jersey.version}</version><!--$NO-MVN-MAN-VER$-->
+      <version>${jersey.version}</version>
+      <!--$NO-MVN-MAN-VER$-->
     </dependency>
-
-    <!-- <dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-processing</artifactId>
-      </dependency> -->
 
     <dependency>
       <groupId>junit</groupId>
@@ -58,46 +58,6 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-
-<!--
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>eclipselink</artifactId>
-      <version>2.6.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.oracle.jdbc</groupId>
-      <artifactId>ojdbc7</artifactId>
-      <version>12.1.0.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>xdb6</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>orai18n</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>xmlparserv2</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>oraclepki</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>osdt_cert</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.oracle.jdbc</groupId>
-          <artifactId>osdt_core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
--->
 
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -114,15 +74,6 @@
 
   <build>
     <plugins>
-      <!-- <plugin> <groupId>org.bsc.maven</groupId> <artifactId>maven-processor-plugin</artifactId>
-        <version>2.2.4</version> <executions> <execution> <id>eclipselink-jpa-metamodel</id>
-        <goals> <goal>process</goal> </goals> <phase>generate-sources</phase> <configuration>
-        <processors> <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
-        </processors> <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
-        <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-        </configuration> </execution> </executions> <dependencies> <dependency> <groupId>org.eclipse.persistence</groupId>
-        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId> <version>2.6.0</version>
-        </dependency> </dependencies> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -155,37 +106,37 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.8</version>
         <executions>
+
           <execution>
             <id>package_accs</id>
             <phase>package</phase>
             <configuration>
               <target>
-                <taskdef resource="net/sf/antcontrib/antlib.xml" />
+                <taskdef resource="net/sf/antcontrib/antlib.xml"/>
                 <!-- <property name="main_class" value="com.example.Main" /> -->
-                <property name="compile_classpath" refid="maven.compile.classpath" />
-                <property name="runtime_classpath" refid="maven.runtime.classpath" />
-                <property name="test_classpath" refid="maven.test.classpath" />
-                <echo message="runtime_classpath: ${runtime_classpath}" />
+                <property name="compile_classpath" refid="maven.compile.classpath"/>
+                <property name="runtime_classpath" refid="maven.runtime.classpath"/>
+                <property name="test_classpath" refid="maven.test.classpath"/>
+                <echo message="runtime_classpath: ${runtime_classpath}"/>
 
-                <property name="app_archive" value="${project.name}-${project.version}.zip" />
-                <property name="jar_archive"
-                  value="${project.name}-${project.version}.${project.packaging}" />
+                <property name="app_archive" value="${project.name}-${project.version}.zip"/>
+                <property name="jar_archive" value="${project.name}-${project.version}.${project.packaging}"/>
                 <!-- <echoproperties /> -->
 
-                <echo message="app_archive: ${app_archive}" />
-                <echo message="jar_archive: ${jar_archive}" />
+                <echo message="app_archive: ${app_archive}"/>
+                <echo message="jar_archive: ${jar_archive}"/>
 
                 <!-- STEP 1: assemble libraries -->
-                <delete dir="./target/lib" />
-                <mkdir dir="./target/lib" />
+                <delete dir="./target/lib"/>
+                <mkdir dir="./target/lib"/>
                 <for list="${runtime_classpath}" delimiter="${path.separator}" param="libjar">
                   <sequential>
                     <!-- <echo message="@{libjar}" /> -->
                     <!-- skip the class directory -->
                     <if>
-                      <available file="@{libjar}" type="file" />
+                      <available file="@{libjar}" type="file"/>
                       <then>
-                        <copy file="@{libjar}" todir="./target/lib" verbose="true" />
+                        <copy file="@{libjar}" todir="./target/lib" verbose="true"/>
                       </then>
                     </if>
                   </sequential>
@@ -193,33 +144,30 @@
 
                 <!-- STEP2: update jar -->
                 <path id="libraries">
-                  <fileset dir="./target/lib" includes="*.jar" />
+                  <fileset dir="./target/lib" includes="*.jar"/>
                 </path>
-                <pathconvert property="classpath" refid="libraries"
-                  targetos="unix" pathsep=" ">
-                  <map from="${basedir}/target/" to="" />
+                <pathconvert property="classpath" refid="libraries" targetos="unix" pathsep=" ">
+                  <map from="${basedir}/target/" to=""/>
                 </pathconvert>
-                <jar jarfile="./target/${jar_archive}" basedir="./target/classes"
-                  update="true">
+                <jar jarfile="./target/${jar_archive}" basedir="./target/classes" update="true">
                   <manifest>
-                    <attribute name="Main-Class" value="${mainclass}" />
-                    <attribute name="Class-Path" value="${classpath}" />
+                    <attribute name="Main-Class" value="${mainclass}"/>
+                    <attribute name="Class-Path" value="${classpath}"/>
                   </manifest>
                 </jar>
 
                 <!-- STEP 3: create Zip for ACCS -->
-                <copy file="./src/main/assembly/manifest.json" todir="./target"
-                  overwrite="yes">
+                <copy file="./src/main/assembly/manifest.json" todir="./target" overwrite="yes">
                   <filterset>
-                    <filter token="JAR_ARCHIVE" value="${jar_archive}" />
+                    <filter token="JAR_ARCHIVE" value="${jar_archive}"/>
                   </filterset>
                 </copy>
                 <zip destfile="./target/${app_archive}">
-                  <zipfileset dir="./target/lib" prefix="lib" />
+                  <zipfileset dir="./target/lib" prefix="lib"/>
 
-                  <fileset dir="./target" includes="${jar_archive}" />
-                  <fileset dir="./target" includes="manifest.json" />
-                  <fileset dir="./src/main/assembly" includes="deployment.json" />
+                  <fileset dir="./target" includes="${jar_archive}"/>
+                  <fileset dir="./target" includes="manifest.json"/>
+                  <fileset dir="./src/main/assembly" includes="deployment.json"/>
                 </zip>
 
               </target>
@@ -231,62 +179,71 @@
 
           <!-- deploy to ACCS -->
           <execution>
-            <id>pdeploy_accs</id>
+            <id>deploy_accs</id>
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <property name="accsServiceURL" value="apaas.europe.oraclecloud.com" />
-                <property name="accsIdentityDomain" value="gse00000630" />
-                <property name="accsUsername" value="cloud.admin" />
-                <property name="accsPassword" value="aCerB@7TeaSing" />
-                <property name="accsContanier" value="accs_upload" />
-                <property name="app_archive" value="${project.name}-${project.version}.zip" />
-                <property name="app_name" value="${project.name}" />
+                <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+                <property name="accsServiceURL" value="apaas.europe.oraclecloud.com"/>
+                <property name="accsIdentityDomain" value="gse00000630"/>
+                <property name="accsUsername" value="cloud.admin"/>
+                <property name="accsPassword" value="aCerB@7TeaSing"/>
+                <property name="accsContanier" value="accs_upload"/>
+                <property name="app_archive" value="${project.name}-${project.version}.zip"/>
+                <property name="app_name" value="${project.name}"/>
                 <tstamp>
-                    <format property="now" pattern="yyyy/MM/dd HH:mm:ss Z" />
+                  <format property="now" pattern="yyyy/MM/dd HH:mm:ss Z"/>
                 </tstamp>
 
-                <echo message="##### Create ACCS Container #####" />
+                <echo message="##### Create Storage Container for ACCS #####"/>
+                <echo message="Container: /Storage-${accsIdentityDomain}/${accsContanier}/"/>
                 <exec failonerror="true" executable="curl">
                   <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-H Content-Length:0"/>
                   <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/"/>
                 </exec>
 
-                <echo message="##### Upload zip to ACCS Container #####" />
+                <echo message="##### Upload application to Storage Container #####"/>
+                <echo message="File: ${app_archive}"/>
                 <exec failonerror="true" executable="curl">
                   <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
                   <arg line="-T target/${app_archive}"/>
                   <arg line="-X PUT https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/${app_archive}"/>
                 </exec>
-<!--
-                <echo message="##### Deploy app to ACCS #####" />
-                <exec failonerror="true" executable="curl">
-                  <arg line="-f -s -S -/-insecure -u ${accsUsername}:${accsPassword}"/>
-                  <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
-                  <arg line="-H Content-Type:multipart/form-data"/>
-                  <arg line="-F name=${app_name}"/>
-                  <arg line="-F runtime=java"/>
-                  <arg line="-F subscription=Monthly"/>
-                  <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
-                  <arg line="-F notes='Packaged at ${now}'"/>
-                  <arg line="-X POST https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}"/>
-                </exec>
--->
-                <!-- arg line="-F manifest=@manifest.json"/ -->
-                <!-- arg line="-F deployment=@deployment.json"/ -->
 
-                <echo message="##### Update app to ACCS #####" />
-                <exec failonerror="true" executable="curl">
-                  <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
-                  <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
-                  <arg line="-H Content-Type:multipart/form-data"/>
-                  <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
-                  <arg line="-F notes='Packaged at ${now}'"/>
-                  <arg line="-X PUT https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${app_name}"/>
-                </exec>
-                <!-- arg line="-F manifest=@manifest.json"/ -->
-                <!-- arg line="-F deployment=@deployment.json"/ -->
+                <if>
+                  <!-- if -Daccs.deploy=create then create a new app on ACCS -->
+                  <equals arg1="${accs.deploy}" arg2="create"/>
+                  <then>
+                    <echo message="##### Deploy app to ACCS #####"/>
+                    <exec failonerror="true" executable="curl">
+                      <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
+                      <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
+                      <arg line="-H Content-Type:multipart/form-data"/>
+                      <arg line="-F name=${app_name}"/>
+                      <arg line="-F runtime=java"/>
+                      <arg line="-F subscription=Monthly"/>
+                      <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
+                      <arg line="-F notes='Packaged at ${now}'"/>
+                      <arg line="-X POST https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}"/>
+                      <!-- arg line="-F manifest=@manifest.json"/ -->
+                      <!-- arg line="-F deployment=@deployment.json"/ -->
+                    </exec>
+                  </then>
+                  <else>
+                    <echo message="##### Update app to ACCS #####"/>
+                    <exec failonerror="true" executable="curl">
+                      <arg line="-f -s -S --insecure -u ${accsUsername}:${accsPassword}"/>
+                      <arg line="-H X-ID-TENANT-NAME:${accsIdentityDomain}"/>
+                      <arg line="-H Content-Type:multipart/form-data"/>
+                      <arg line="-F archiveURL=${accsContanier}/${app_archive}"/>
+                      <arg line="-F notes='Packaged at ${now}'"/>
+                      <arg line="-X PUT https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${app_name}"/>
+                      <!-- arg line="-F manifest=@manifest.json"/ -->
+                      <!-- arg line="-F deployment=@deployment.json"/ -->
+                    </exec>
+                  </else>
+                </if>
               </target>
             </configuration>
             <goals>
@@ -310,8 +267,8 @@
         </dependencies>
 
       </plugin>
-
     </plugins>
+
     <pluginManagement>
       <plugins>
         <!--This plugin's configuration is used to store Eclipse m2e settings
@@ -347,8 +304,5 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <!-- <pluginRepositories> <pluginRepository> <id>maven.oracle.com</id> <url>https://maven.oracle.com</url>
-    </pluginRepository> </pluginRepositories> -->
 
 </project>
