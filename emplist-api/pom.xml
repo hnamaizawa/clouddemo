@@ -27,6 +27,36 @@
         </configuration>
       </plugin>
 
+      <!-- this plugin is for making metamodel of JPA criteria query
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>eclipselink-jpa-metamodel</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <processors>
+                                <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
+                            </processors>
+                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.persistence</groupId>
+                        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
+                        <version>2.6.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            -->
     </plugins>
   </build>
   <dependencyManagement>
@@ -117,41 +147,6 @@
       <version>4.16</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <!-- this plugin is for making metamodel of JPA criteria query
-            <plugin>
-                <groupId>org.bsc.maven</groupId>
-                <artifactId>maven-processor-plugin</artifactId>
-                <version>2.2.4</version>
-                <executions>
-                    <execution>
-                        <id>eclipselink-jpa-metamodel</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <processors>
-                                <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
-                            </processors>
-                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.persistence</groupId>
-                        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
-                        <version>2.6.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            -->
-    </plugins>
-  </build>
 
   <repositories>
     <repository>

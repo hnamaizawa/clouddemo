@@ -13,8 +13,8 @@
     <jersey.version>2.23.2</jersey.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <oracleMiddlewareHome>C:/opt/oracle/wls122100</oracleMiddlewareHome>
-    <oracleServerUrl>t3://localhost:7001</oracleServerUrl>
+    <oracleMiddlewareHome></oracleMiddlewareHome>
+    <oracleServerUrl>http://localhost:7001</oracleServerUrl>
     <oracleUsername>weblogic</oracleUsername>
     <oraclePassword>welcome1</oraclePassword>
     <oracleServerName>AdminServer</oracleServerName>
@@ -27,7 +27,7 @@
   </parent>
 
   <build>
-    <finalName>ROOT</finalName>
+    <finalName>emplist-root</finalName>
 
     <plugins>
 
@@ -52,7 +52,7 @@
             <phase>package</phase>
             <configuration>
               <target>
-                <zip update="true" destfile="./target/ROOT.war">
+                <zip update="true" destfile="./target/${project.build.finalName}.war">
                   <zipfileset dir="../work/oraclejet" />
                 </zip>
               </target>
@@ -68,23 +68,24 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <echo message="##### undelopy ROOT.war #####" />
+                <echo message="##### undelopy ${project.build.finalName} #####" />
                 <exec failonerror="false" executable="curl">
-                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-f -s -S -u ${oracleUsername}:${oraclePassword} --noproxy localhost"/>
                   <arg line="-H X-Requested-By:MyClient"/>
                   <arg line="-H Accept:application/json"/>
-                  <arg line="-X DELETE http://localhost:7001/management/weblogic/latest/edit/appDeployments/ROOT?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
+                  <arg line="-X DELETE ${oracleServerUrl}/management/weblogic/latest/edit/appDeployments/${project.build.finalName}?links=job,abort&amp;fields=completed,progress,error,state,operationType,applicationName"/>
                 </exec>
-                <echo message="##### delopy ROOT.war #####" />
+                <echo message="##### delopy ${project.build.finalName}.war #####" />
                 <exec failonerror="true" executable="curl">
-                  <arg line="-f -s -S -u weblogic:welcome1 --noproxy localhost"/>
+                  <arg line="-f -s -S -u ${oracleUsername}:${oraclePassword} --noproxy localhost"/>
                   <arg line="-H X-Requested-By:MyClient"/>
                   <arg line="-H Accept:application/json"/>
                   <arg line="-H Content-Type:multipart/form-data"/>
-                  <arg line="-F model={name:'ROOT',targets:[{identity:['servers','AdminServer']}]}"/>
-                  <arg line="-F sourcePath=@target/ROOT.war"/>
+                  <!-- model name and file name must be unique!!! -->
+                  <arg line="-F model={name:'${project.build.finalName}',targets:[{identity:['servers','${oracleServerName}']}]}"/>
+                  <arg line="-F sourcePath=@target/${project.build.finalName}.war"/>
                   <!-- arg line="-H Prefer:respond-async"/ -->
-                  <arg line="-X POST http://localhost:7001/management/weblogic/latest/edit/appDeployments"/>
+                  <arg line="-X POST ${oracleServerUrl}/management/weblogic/latest/edit/appDeployments"/>
                 </exec>
               </target>
             </configuration>
@@ -96,13 +97,10 @@
         </executions>
         <dependencies>
           <dependency>
-            <!-- to workaround the loading order -->
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
             <version>1.9.6</version>
           </dependency>
-          <!-- <dependency> <groupId>ant-contrib</groupId> <artifactId>ant-contrib</artifactId>
-            <version>1.0b3</version> </dependency> -->
         </dependencies>
       </plugin>
 
