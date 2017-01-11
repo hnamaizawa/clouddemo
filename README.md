@@ -9,7 +9,7 @@ Demo source of Java and Oracle Cloud Platform seminar @OAC on Dec 2nd, 2016
 
 其々 mvn package して出来あがった2つのwarをデプロイします  
 Tomcatの場合はデプロイする際にデフォルトのROOTを削除してROOT.warを配置して下さい（ルートコンテキストで動かす場合）  
-pom-weblogic.xml は `mvn pre-integration-test` でWebLogicにデプロイするように仕込んであります
+pom-weblogic.xml は `mvn -f pom-weblogic.xml pre-integration-test` でWebLogicにデプロイするように仕込んであります
 
 ### maven pom
 * pom.xml Tomcat用
