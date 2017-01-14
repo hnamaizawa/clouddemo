@@ -62,7 +62,7 @@ public class TestStateRestServiceTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        //server.shutdown();
+    	SetupTestServer.shutdown();
     }
 
     /**

@@ -19,6 +19,7 @@ public class SetupTestServer {
 		
     	// start the server
         server = Main.startServer(BASE_URI);
+        /* Gradleだとここでエラーになるようなので、shutdownhookは使わない
         Runtime.getRuntime().addShutdownHook(new Thread(){
 			@Override
 			public void run() {
@@ -26,7 +27,16 @@ public class SetupTestServer {
 				System.out.println("server shutdown.");
 			}
         });
+        */
 		
 	}
+	
+	public static void shutdown(){
+		if(null != server){
+			server.shutdown();
+			System.out.println("server shutdown.");
+		}
+	}
+
 	
 }
