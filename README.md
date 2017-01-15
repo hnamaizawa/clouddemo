@@ -53,3 +53,12 @@ ACCS向けの軽量JAX-RSサーバーの作り方としては標準的なもの�
 
 デプロイしたアプリケーションを更新するときは  
 `mvn pre-integration-test`  
+
+### Gradleによるbuild
+`gradle zip` で build/distributions ディレクトリにACCS用のzipファイルを作成します  
+`gradle execute` でサーバーを起動します  
+ACCSへのデプロイ/更新/削除は、それぞれ  
+`gradle -Daccs.create=true deployToACCS`  
+`gradle deployToACCS`  
+`gradle deleteFromACCS`  
+を実行して下さい
