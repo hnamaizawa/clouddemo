@@ -1,9 +1,16 @@
-
 apply plugin: 'java'
 
+version = '1.0.0-SNAPSHOT'
+
 ext{
-	mainClass = 'com.example.Main'
-	jerseyVersion = '2.23.2' 
+    mainClass = 'com.example.Main'
+    jerseyVersion = '2.23.2'
+
+    accsServiceURL = "https://apaas.europe.oraclecloud.com"
+    accsIdentityDomain = "gse00000630"
+    accsUsername = "cloud.admin"
+    accsPassword = "aCerB@7TeaSing"
+    accsContanier = "accs_upload"
 }
 
 repositories {
@@ -22,111 +29,114 @@ dependencies {
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 task execute(type:JavaExec) {
-	main = mainClass
-	classpath = sourceSets.main.runtimeClasspath
+    main = mainClass
+    classpath = sourceSets.main.runtimeClasspath
 }
 
-// ACCS用のzipを一緒に作ってしまう
+// クラスパスをmainifestに埋め込んでおく
 jar {
-	// create class-path string for manifest file
-	def classPathString = ''
-	def isFirst = true
-	sourceSets.main.runtimeClasspath.each{
-		if(it.isFile()){
-			if(!isFirst) classPathString += ' ' else isFirst = false
-			classPathString += 'lib/' + it.name
-		}
-	}
-	// println 'Class-Path: ' + classPathString
-	
-	manifest {
-		attributes 'Main-Class': mainClass
-		attributes 'Class-Path' : classPathString
-	}
-	
-	doLast(){
-		// copy main jar
-		ant.copy(file: new File(libsDir, archivesBaseName + '.jar'), todir: new File(buildDir, 'deploy'))
-		// copy lib jar
-		sourceSets.main.runtimeClasspath.each{
-			if(it.isFile()){
-				ant.copy(file: it, todir: new File(buildDir, 'deploy/lib'))
-			}
-		}
-		// replace keyword and copy manifest.json
-		new File(buildDir, 'deploy/manifest.json').withWriter('UTF-8', { writer ->
-			new File(project.projectDir, 'src/main/assembly/manifest.json').readLines('UTF-8').each{
-				writer.write(it.replaceAll('@JAR_ARCHIVE@', archivesBaseName + '.jar') + '\n')
-			}
-		})
-		ant.zip(destfile: new File(libsDir, archivesBaseName + '.zip')) {
-			fileset(dir : new File(buildDir, 'deploy'))
-			fileset(file: new File(project.projectDir, 'src/main/assembly/deployment.json'))
-		}
-	}
+    // create class-path string for manifest file
+    def classPathString = ''
+    def isFirst = true
+    sourceSets.main.runtimeClasspath.each{
+        if(it.isFile()){
+            if(!isFirst) classPathString += ' ' else isFirst = false
+            classPathString += 'lib/' + it.name
+        }
+    }
+    // println 'Class-Path: ' + classPathString
+    manifest {
+        attributes 'Main-Class': mainClass
+        attributes 'Class-Path' : classPathString
+    }
 }
 
-task deployACCS(dependsOn: jar){
-	def accsServiceURL = "apaas.europe.oraclecloud.com"
-	def accsIdentityDomain = "gse00000630"
-	def accsUsername = "cloud.admin"
-	def accsPassword = "aCerB@7TeaSing"
-	def accsContanier = "accs_upload"
-	def appArchive = archivesBaseName + '.zip'
-	def file = new File(libsDir, appArchive).absolutePath
-	def appName = archivesBaseName
-	def now = new Date().format("yyyy/MM/dd HH:mm:ss z")
-	
-	doLast(){
-		println "##### Create Storage Container for ACCS #####"
-		println "Container: /Storage-${accsIdentityDomain}/${accsContanier}/"
-		def process = 
-			['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
-			 '-H', 'Content-Length: 0', '-X', 'PUT', 
-			 "https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/"
-			].execute()
-		process.text.eachLine {println it}
-		if(process.exitValue() > 0) throw new GradleException('failed to create container - returned ' + process.exitValue())
-		
-		println "##### Upload application to Storage Container #####"
-		println "File: ${appArchive}"
-		process =
-			['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
-			 '-T', file, '-X', 'PUT', 
-			 "https://${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/${appArchive}"
-			].execute()
-		process.text.eachLine {println it}
-		if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
-		
-		if(System.properties['accs.deploy']){
-			println '##### Deploy app to ACCS #####'
-			process =
-			['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
-			 '-H', "X-ID-TENANT-NAME: ${accsIdentityDomain}",
-			 '-H', 'Content-Type: multipart/form-data',
-			 '-F', "name=${appName}",
-			 '-F', 'runtime=java', '-F', 'subscription=Monthly',
-			 '-F', "archiveURL=${accsContanier}/${appArchive}",
-			 '-F', "notes=Packaged at ${now}",
- 			 '-X', 'POST',
-			 "https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}"
-			].execute()
-			process.text.eachLine {println it}
-			if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
-		}else{
-			println '##### Update app to ACCS #####'
-			process =
-			['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
-			 '-H', "X-ID-TENANT-NAME: ${accsIdentityDomain}",
-			 '-H', 'Content-Type: multipart/form-data',
-			 '-F', "archiveURL=${accsContanier}/${appArchive}",
-			 '-F', "notes=Packaged at ${now}",
-			  '-X', 'PUT',
-			 "https://${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${appName}"
-			].execute()
-			process.text.eachLine {println it}
-			if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
-		}
-	}
+// ACCS用のzipをを作る
+task zip(type: Zip, dependsOn: jar) {
+    from jar.archivePath
+    // manifest.json
+    into ('/', {
+        from new File(project.projectDir, 'src/main/assembly/manifest.json')
+        filter { line -> line.replaceAll('@JAR_ARCHIVE@', jar.archiveName) }
+        })
+    // runtime jars
+    into ('/lib', {
+        from sourceSets.main.runtimeClasspath.findAll {it.isFile()}
+        })
 }
 
+task deployToACCS(dependsOn: zip){
+    def appArchive = zip.archiveName
+    def file = zip.archivePath
+    def now = new Date().format("yyyy/MM/dd HH:mm:ss z")
+
+    doLast(){
+        def appName = project.name
+
+        println ">>> creating Storage Container for ACCS"
+        println "Container: /Storage-${accsIdentityDomain}/${accsContanier}/"
+        def process =
+          ['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
+          '-H', 'Content-Length: 0', '-X', 'PUT',
+          "${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/"
+        ].execute()
+        process.text.eachLine {println it}
+        if(process.exitValue() > 0) throw new GradleException('failed to create container - returned ' + process.exitValue())
+
+        println ">>> uploading application to Storage Container"
+        println "File: ${appArchive}"
+        process =
+          ['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
+          '-T', file, '-X', 'PUT',
+          "${accsIdentityDomain}.storage.oraclecloud.com/v1/Storage-${accsIdentityDomain}/${accsContanier}/${appArchive}"
+        ].execute()
+        process.text.eachLine {println it}
+        if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
+
+        if(System.properties['accs.create']){
+            println ">>> deploying app: ${appName}"
+            process =
+              ['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
+              '-H', "X-ID-TENANT-NAME: ${accsIdentityDomain}",
+              '-H', 'Content-Type: multipart/form-data',
+              '-F', "name=${appName}",
+              '-F', 'runtime=java', '-F', 'subscription=Monthly',
+              '-F', "archiveURL=${accsContanier}/${appArchive}",
+              '-F', "notes=Packaged at ${now}",
+              '-X', 'POST',
+              "${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}"
+            ].execute()
+            process.waitForProcessOutput(System.out, System.err)
+            if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
+        }else{
+            println ">>> updating app: ${appName}"
+            process =
+              ['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
+              '-H', "X-ID-TENANT-NAME: ${accsIdentityDomain}",
+              '-H', 'Content-Type: multipart/form-data',
+              '-F', "archiveURL=${accsContanier}/${appArchive}",
+              '-F', "notes=Packaged at ${now}",
+              '-X', 'PUT',
+              "${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${appName}"
+            ].execute()
+            process.waitForProcessOutput(System.out, System.err)
+            if(process.exitValue() > 0) throw new GradleException('failed upload app - returned ' + process.exitValue())
+        }
+    }
+}
+
+task deleteFromACCS{
+    def appName = project.name
+
+    doLast(){
+        println ">>> deleting app: ${appName}"
+        def process =
+          ['curl', '-f', '-s', '-S', '--insecure', '-u', "${accsUsername}:${accsPassword}",
+          '-H', "X-ID-TENANT-NAME: ${accsIdentityDomain}",
+          '-X', 'DELETE',
+          "${accsServiceURL}/paas/service/apaas/api/v1.1/apps/${accsIdentityDomain}/${appName}"
+        ].execute()
+        process.waitForProcessOutput(System.out, System.err)
+        if(process.exitValue() > 0) throw new GradleException('failed delete app - returned ' + process.exitValue())
+    }
+}
